@@ -71,7 +71,8 @@ if __name__ == "__main__":
     try:
         start = time.time()
         #result = simulate_cache(args.nsets, args.bsize, args.assoc, args.subs_method, args.output_flag, args.input_file, args.debug)
-        result = simulate_cache(256, 4, 1, "F", 0, "C:\\Users\\gusta\\OneDrive\\Documents\\GitHub\\cache_simulator\\example_files\\address\\bin_100.bin", True)
+        result = simulate_cache(1, 4, 32, "L", 1, 
+        "C:\\Users\\gusta\\OneDrive\\Documents\\GitHub\\cache_simulator\\example_files\\address\\vortex.in.sem.persons.bin", True)
         end = time.time()
         print(result)
         print("Execution time: {:.6f} seconds".format(end - start))

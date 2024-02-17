@@ -43,13 +43,17 @@ class Cache:
         self.debug_var = debug_var
 
         # Cache calculated parameters
-        self.number_of_blocks = self.nsets * self.ways * self.bsize 
+        self.number_of_blocks = self.nsets * self.ways
         self.n_bits_offset = int(log2(self.bsize))
         self.n_bits_indice = int(log2(self.nsets))
-        self.n_bits_tag = 32 - self.n_bits_offset - self.n_bits_indice
+        self.n_bits_tag = 32 - (self.n_bits_offset + self.n_bits_indice)
+        self.cache_size = self.nsets * self.bsize * self.ways
+
+        # Calculating real cache size (in bytes)
+        self.real_cache_size = ((self.n_bits_tag + 1 + (self.bsize * 8)) * self.nsets * self.ways) / 8
 
         # Cache structure
-        self.cache_set: CacheSet = CacheSet(self.bsize, self.nsets, self.ways, self.subs_method)
+        self.cache_set: CacheSet = CacheSet(self.number_of_blocks, self.bsize, self.nsets, self.ways, self.subs_method)
     
     def simulate_cache(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> None:
         """
@@ -112,13 +116,16 @@ class Cache:
         self.set_cache_statistics()
 
         if self.output_flag == 0:
-            return "Total accesses: {}\nHit rate: {} %\nMiss rate: {} %\nCompulsory miss rate: {} %\nCapacity miss rate: {} %\nConflict miss rate: {} %\nTotal misses: {}".format(
+            return "Total accesses: {}\nHit rate: {} %\nMiss rate: {} %\nCompulsory miss rate: {} %\nCapacity miss rate: {} %\nConflict miss rate: {} %\nConflict misses: {}\nCompulsory misses:{}\nCapacity misses: {}\nTotal misses: {}".format(
                 self.total_accesses, 
                 self.hit_rate * 100, 
                 self.miss_rate * 100, 
                 self.compulsory_miss_rate * 100, 
                 self.capacity_miss_rate * 100, 
                 self.conflict_miss_rate * 100,
+                self.conflict_misses,
+                self.compulsory_misses,
+                self.capacity_misses,
                 self.total_misses
             )
         elif self.output_flag == 1:
@@ -140,14 +147,14 @@ class Cache:
         """
         self.total_misses = self.compulsory_misses + self.capacity_misses + self.conflict_misses
         if (self.total_accesses != 0):
-            self.hit_rate = round(self.memory_access_hit / self.total_accesses, 4)
+            self.hit_rate = round(self.memory_access_hit / self.total_accesses, 2)
         
-        self.miss_rate = round(1 - self.hit_rate,4)
+        self.miss_rate = round(1 - self.hit_rate, 2)
 
         if (self.total_misses != 0):
-            self.compulsory_miss_rate = round(self.compulsory_misses / self.total_misses, 4)
-            self.capacity_miss_rate = round(self.capacity_misses / self.total_misses, 4)
-            self.conflict_miss_rate = round(self.conflict_misses / self.total_misses, 4)
+            self.compulsory_miss_rate = round(self.compulsory_misses / self.total_misses, 2)
+            self.capacity_miss_rate = round(self.capacity_misses / self.total_misses, 2)
+            self.conflict_miss_rate = round(self.conflict_misses / self.total_misses, 2)
 
     def debug(self) -> None:
         """

@@ -20,6 +20,9 @@ class Block:
         self.block_tag: deque[int] = deque([], maxlen= self.ways)                # Create a deque with the max length of the ways
         self.block_valid: deque[int] = deque([], maxlen= self.ways)              # Create a deque with the max length of the ways
 
+        # LRU structure
+        self.lru_counter: deque[int] = deque([], maxlen= self.ways)              # Create a deque with the max length of the ways
+
         # Startup
         self.start_block()
 
@@ -44,7 +47,10 @@ class Block:
             way (int): Way to update the block.
             tag (int): Tag to update the block.
         """
+        # Update the block tag
         self.block_tag[way] = tag
+
+        # Update the block valid bit
         self.block_valid[way] = 1
 
     def update_fifo(self, tag) -> None:
@@ -55,16 +61,41 @@ class Block:
             tag (int): Tag to update the block.
         """
         # append left the tag and valid bit
-        self.block_tag.appendleft(tag)
-        self.block_valid.appendleft(1)
+        self.block_tag.append(tag)
+        self.block_valid.append(1)
 
-    def update_lru(self, tag) -> None:
+    def update_lru(self, tag:int) -> str:
         """
         Update the block with LRU.
 
         Args:
-            tag (int): Tag to update the block.
+            way (int): Tag to update the block.
         """
 
         # Update LRU
-        pass
+        way = self.lru_counter.pop()
+        self.record_access(way)
+
+        # Update the block tag
+        self.block_tag[way] = tag
+
+        # Update the block valid bit
+        self.block_valid[way] = 1
+
+        return ""
+    
+    def record_access(self, way: int) -> None:
+        """
+        Record the access of the block. For LRU Use
+
+        Args:
+            tag (int): tag to record the access.
+        """
+
+        # Check if the way is already in the LRU counter
+        if way in self.lru_counter:
+            self.lru_counter.remove(way)
+
+        # Record the access
+        self.lru_counter.appendleft(way)
+        
