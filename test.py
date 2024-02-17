@@ -1,15 +1,14 @@
 from collections import deque
 
-de = deque([], maxlen= 4)
+dq = deque(['b','a','c'])
+print(dq)
 
-de.appendleft(1)
-de.appendleft(2)
-de.appendleft(3)
-de.appendleft(4)
-de.appendleft(5)
+# LRU
+if 'a' in dq:
+    dq.remove('a')
 
-print(de) # deque([5, 4, 3, 2], maxlen=4)
+print(dq)
 
-de.appendleft(6)
+dq.appendleft('a')
 
-print(de) # deque([6, 5, 4, 3], maxlen=4)
+print(dq)
