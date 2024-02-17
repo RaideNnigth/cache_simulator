@@ -7,13 +7,14 @@ Description: Cache core class for processing data and saving data structure.
 
 from collections import deque
 from math import log2, pow
+from cache_set import CacheSet
 
 class Cache:
-    def __init__(self, nsets: int, bsize: int, assoc: int, subs_method: str, output_flag: int, input_file: str, debug_var: bool = False):
+    def __init__(self, nsets: int, bsize: int, ways: int, subs_method: str, output_flag: int, input_file: str, debug_var: bool = False):
         # Cache parameters
         self.nsets = nsets
         self.bsize = bsize
-        self.assoc = assoc
+        self.ways = ways
         self.subs_method = subs_method
         self.output_flag = output_flag
         self.input_file = input_file
@@ -42,48 +43,21 @@ class Cache:
         self.debug_var = debug_var
 
         # Cache calculated parameters
-        self.number_of_blocks = self.nsets * self.assoc 
+        self.number_of_blocks = self.nsets * self.ways
         self.n_bits_offset = int(log2(self.bsize))
         self.n_bits_indice = int(log2(self.nsets))
-        self.n_bits_tag = 32 - self.n_bits_offset - self.n_bits_indice
+        self.n_bits_tag = 32 - (self.n_bits_offset + self.n_bits_indice)
+        self.cache_size = self.nsets * self.bsize * self.ways
+
+        # Calculating real cache size (in bytes)
+        self.real_cache_size = ((self.n_bits_tag + 1 + (self.bsize * 8)) * self.nsets * self.ways) / 8
 
         # Cache structure
-        self.cache_tag_bits = {}        # Key is the index, value is a tag (int)
-        self.cache_valid_bits = {}      # Key is the index, value is a valid bit (0 or 1)
-
-
-    def simulate_cache(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> str:
-        """
-        Simulate the cache and return some statistics.
-        It chooses the cache request method based on the associativity.
-
-        Args:
-            memory_address_byte (list[bytes]): List of bytes with the memory address.
-            memory_address_int (list[int]): List of integers with the memory address.
-        Returns:
-            str: Statistics from the cache simulation
-        """
-        if self.assoc == 1:
-            self.direct_mapping(memory_address_byte, memory_address_int)
-        elif self.assoc > 1:
-            self.multi_way_set_associative(memory_address_byte, memory_address_int)
-        return self.get_output()
+        self.cache_set: CacheSet = CacheSet(self.number_of_blocks, self.bsize, self.nsets, self.ways, self.subs_method)
     
-    def multi_way_set_associative(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> None:
+    def simulate_cache(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> None:
         """
-        Get the cache request for memory access for multi-way set associative. It will update the cache structure and the misses counters.
-
-        Args:
-            memory_address_byte (list[bytes]): List of bytes with the memory address.
-            memory_address_int (list[int]): List of integers with the memory address.
-        Returns:
-            list[int]: List of integers with the cache request.
-        """
-        pass
-
-    def direct_mapping(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> None:
-        """
-        Get the cache request for memory access for direct mapping. It will update the cache structure and the misses counters.
+        Simulate the cache and return some statistics. (Can simulate direct-mapped, fully associative and multi-way set associative)
 
         Args:
             memory_address_byte (list[bytes]): List of bytes with the memory address.
@@ -97,31 +71,38 @@ class Cache:
             tag = address >> int(self.n_bits_offset + self.n_bits_indice)
             index = (address >> self.n_bits_offset) & int(pow(2, self.n_bits_indice) -1)
 
-            if self.cache_valid_bits.get(index) == 1:
-                if self.cache_tag_bits.get(index) == tag:
-                    self.memory_access_hit += 1
-                else:
-                    self.miss_treatment_direct_mapping(tag, index)
-                    if len(self.cache_tag_bits) == self.number_of_blocks:
-                        self.capacity_misses += 1
-                    elif len(self.cache_tag_bits) < self.number_of_blocks:
-                        self.conflict_misses += 1
-            else:
+            # Check the memory access and update the cache set
+            result = self.cache_set.check_memory_access(index, tag)
+            # Update the counters
+            if result == "Hit":
+                self.memory_access_hit += 1
+            elif result == "Compulsory miss":
                 self.compulsory_misses += 1
-                self.miss_treatment_direct_mapping(tag, index)
+            elif result == "Conflict miss":
+                self.conflict_misses += 1
+            elif result == "Capacity miss":
+                self.capacity_misses += 1
+                  
+            # Update the total accesses
             self.total_accesses += 1
 
-    def miss_treatment_direct_mapping(self, tag: int, index: int) -> None:
+            # Check for debug mode to log the address, tag and index
+            if self.debug_var:
+                self.save_on_log("Address: {}, tag: {}, index: {}, result: {}".format(address, tag, index, result))
+        
+        # Return the output
+        return self.get_output()
+    
+    def save_on_log(self, message: str) -> None:
         """
-        Treat the miss for the direct mapping cache.
+        Save a message on a log file.
 
         Args:
-            tag (int): Tag for the miss.
-            index (int): Index for the miss.
+            message (str): Message to save on the log file.
         Returns:
         """
-        self.cache_valid_bits[index] = 1
-        self.cache_tag_bits[index] = tag
+        with open("log.txt", "a") as file:
+            file.write(message + "\n")
 
     def get_output(self) -> str:
         """
@@ -135,13 +116,17 @@ class Cache:
         self.set_cache_statistics()
 
         if self.output_flag == 0:
-            return "Total accesses: {}\nHit rate: {}\nMiss rate: {}\nCompulsory miss rate: {}\nCapacity miss rate: {}\nConflict miss rate: {}".format(
+            return "Total accesses: {}\nHit rate: {} %\nMiss rate: {} %\nCompulsory miss rate: {} %\nCapacity miss rate: {} %\nConflict miss rate: {} %\nConflict misses: {}\nCompulsory misses:{}\nCapacity misses: {}\nTotal misses: {}".format(
                 self.total_accesses, 
-                self.hit_rate, 
-                self.miss_rate, 
-                self.compulsory_miss_rate, 
-                self.capacity_miss_rate, 
-                self.conflict_miss_rate
+                self.hit_rate * 100, 
+                self.miss_rate * 100, 
+                self.compulsory_miss_rate * 100, 
+                self.capacity_miss_rate * 100, 
+                self.conflict_miss_rate * 100,
+                self.conflict_misses,
+                self.compulsory_misses,
+                self.capacity_misses,
+                self.total_misses
             )
         elif self.output_flag == 1:
             return "{}, {}, {}, {}, {}, {}".format(
@@ -162,14 +147,14 @@ class Cache:
         """
         self.total_misses = self.compulsory_misses + self.capacity_misses + self.conflict_misses
         if (self.total_accesses != 0):
-            self.hit_rate = round(self.memory_access_hit / self.total_accesses, 4)
+            self.hit_rate = round(self.memory_access_hit / self.total_accesses, 2)
         
-        self.miss_rate = round(1 - self.hit_rate,4)
+        self.miss_rate = round(1 - self.hit_rate, 2)
 
         if (self.total_misses != 0):
-            self.compulsory_miss_rate = round(self.compulsory_misses / self.total_misses, 4)
-            self.capacity_miss_rate = round(self.capacity_misses / self.total_misses, 4)
-            self.conflict_miss_rate = round(self.conflict_misses / self.total_misses, 4)
+            self.compulsory_miss_rate = round(self.compulsory_misses / self.total_misses, 2)
+            self.capacity_miss_rate = round(self.capacity_misses / self.total_misses, 2)
+            self.conflict_miss_rate = round(self.conflict_misses / self.total_misses, 2)
 
     def debug(self) -> None:
         """
