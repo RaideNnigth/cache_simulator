@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Lemon_Juice_SIM_CACHE</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+
+{% block body %}
+
+<div class="alertContainer">
+    <label>
+        <input type="checkbox" class="alertCheckbox" autocomplete="off" />
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{category}}">
+                            <span class="alertClose">X</span>
+                            <span class="alertMessage">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+    </label>
+</div>
+
+<div class="home_blocks">
+    <div class="row config-row">
+        <div class="column" id="basic-config">
+            <form action='/submit_cache' method="post" id="submit_cache_form" method="post" enctype="multipart/form-data">
+                <!-- Input for Cache Configuration -->
+                <input type="hidden" id="output_flag" name="output_flag" value="0">
+                <input type="hidden" id="debug" name="debug" value="0">
+
+                <label for="sets">Number of Sets:</label>
+                <input type="number" id="nsets" name="nsets" min="1" max="5120" value="1"><br><br>
+
+                <label for="block-size">Block Size:</label>
+                <input type="number" id="bsize" name="bsize" min="1" max="5120" value="1"><br><br>
+
+                <label for="associativity">Associativity:</label>
+                <input type="number" id="assoc" name="assoc" min="1" max="5120" value="1"><br><br>
+
+                <label for="substitution-method">Substitution Method:</label>
+                <select id="subs_method" name="subs_method" value="LRU">
+                    <option value="LRU">LRU</option>
+                    <option value="FIFO">FIFO</option>
+                    <option value="Random">Random</option>
+                </select><br><br>
+
+                <label for="file">Select .bin file:</label>
+                <input type="file" id="file" name="file" accept=".bin"><br><br>
+
+                <button type="submit">Submit</button>
+            </form>
+            <form action="/sim_cache" method="post" id="sim_cache_form" method="post" enctype="multipart/form-data">
+                <button type="submit">Simulate</button>
+            </form>
+            <form action="/clean_cache" method="post" id="clean_cache_form" method="post" enctype="multipart/form-data">
+                <button type="submit">Clean Cache</button>
+            </form>
+        </div>
+    </div>
+    <div class="row memory-row">
+        <table class="scrolldown">
+            <thead>
+                <tr>
+                    {% for header in headings %}
+                    <th>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById("sim_cache_form").addEventListener("submit", function(event) {
+        // Prevent default form submission behavior
+        event.preventDefault();
+
+        // Get the form data
+        var formData = new FormData(document.getElementById("sim_cache_form"));
+        
+        // Send an AJAX request to the Flask route
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/process_sim_cache");
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // Update the table with the new data, row by row with 1 second delay
+                var table = document.querySelector(".scrolldown");
+                var rows = table.getElementsByTagName("tr");
+                // Parse the JSON response
+                var responseObject = JSON.parse(xhr.responseText);
+
+                // Get the "data" array from the response object
+                var data = responseObject.data;
+                
+                // Remove the old data
+                while (rows.length > 1) {
+                    table.removeChild(rows[1]);
+                    console.log(rows.length);
+                }
+                for (var i = 0; i < data.length; i++) {
+                    setTimeout(function(rowData) {
+                        if (rows.length >= 11) {
+                            // Remove first tr in tb
+                            table.getElementsByTagName("tbody")[0].firstElementChild.remove();
+                        }
+                        
+                        // Create a new row
+                        var newRow = document.createElement("tr");
+                        
+                        // if data to be parsed in row contains miss, change color to red
+                        if (rowData[3].includes("Capacity miss") || rowData[3].includes("Conflict miss") || rowData[3].includes("Compulsory miss") ) {
+                            newRow.style.backgroundColor = "red";
+                        }
+
+                        for (var j = 0; j < rowData.length; j++) {
+                            var newCell = document.createElement("td");
+                            newCell.textContent = rowData[j];
+                            newRow.appendChild(newCell);
+                            
+                        }
+                        table.getElementsByTagName("tbody")[0].appendChild(newRow);
+                        
+                        
+                    }, (i + 1) * 1000, data[i]);
+                }
+            }
+        };
+        xhr.send(formData);
+
+        cleanDataOnFlask();
+    });
+
+    function cleanDataOnFlask() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/process_clean_cache");
+        xhr.send();
+    }
+</script>
+
+{% endblock %}

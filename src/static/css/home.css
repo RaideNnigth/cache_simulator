@@ -1,0 +1,189 @@
+.home_blocks {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.config-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.memory-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: auto;
+    width: 750px;
+}
+
+.config-row,
+.memory-row {
+    color: #fff;
+    word-wrap: break-word;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-top: 200px;
+    padding: 20px;
+    border: 1px solid #13944d;
+    border-radius: 10px;
+    background-color: #13944d;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#sim_cache_form {
+    margin-top: 7px;
+    margin-right: 10px;
+}
+
+#clean_cache_form {
+    margin-top: 7px;
+}
+
+/* Style the container for home page*/
+.container {
+    max-width: 1120px;
+}
+
+
+/* Table Styles */
+
+table.scrolldown {
+    width: 100%;
+
+    /* border-collapse: collapse; */
+    border-spacing: 0;
+    border: 2px solid black;
+}
+
+/* To display the block as level element */
+table.scrolldown tbody,
+table.scrolldown thead {
+    display: block;
+}
+
+thead tr th {
+    height: 40px;
+    line-height: 40px;
+}
+
+table.scrolldown tbody {
+
+    /* Set the height of table body */
+    height: 260px;
+
+    /* Set vertical scroll */
+    overflow-y: hidden;
+
+    /* Hide the horizontal scroll */
+    overflow-x: hidden;
+}
+
+tbody {
+    border-top: 2px solid black;
+}
+
+tbody td,
+thead th {
+    width: 200px;
+    border-right: 2px solid black;
+}
+
+td {
+    text-align: center;
+}
+
+.alertContainer {
+    position: fixed;
+    /* or position: absolute; */
+    top: 0;
+    left: 0;
+    width: fit-content;
+    z-index: 9999;
+    /* Ensure alerts appear on top of everything */
+}
+
+.alert {
+    width: auto;
+    height: auto;
+    padding: 10px;
+    margin: 10px;
+    line-height: 1.8;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-weight: 400;
+}
+
+.alertMessage {
+    padding-right: 50px;
+}
+
+.alertCheckbox {
+    display: none;
+}
+
+:checked+.alert {
+    display: none;
+}
+
+.alertText {
+    display: table;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 16px;
+}
+
+.alertClose {
+    float: right;
+    padding-top: 5px;
+    font-size: 10px;
+}
+
+.clear {
+    clear: both;
+}
+
+.clear {
+    clear: both;
+}
+
+.info {
+    background-color: #EEE;
+    border: 1px solid #DDD;
+    color: #999;
+}
+
+.success {
+    background-color: #EFE;
+    border: 1px solid #DED;
+    color: #9A9;
+}
+
+.notice {
+    background-color: #EFF;
+    border: 1px solid #DEE;
+    color: #9AA;
+}
+
+.warning {
+    background-color: #FDF7DF;
+    border: 1px solid #FEEC6F;
+    color: #C9971C;
+}
+
+.error {
+    background-color: #FEE;
+    border: 1px solid #EDD;
+    color: #A66;
+}

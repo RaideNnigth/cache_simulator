@@ -7,7 +7,7 @@ Description: Cache core class for processing data and saving data structure.
 
 from collections import deque
 from math import log2, pow
-from cache_set import CacheSet
+from .cache_set import CacheSet
 
 class Cache:
     def __init__(self, nsets: int, bsize: int, ways: int, subs_method: str, output_flag: int, input_file: str, debug_var: bool = False):
@@ -86,9 +86,9 @@ class Cache:
             # Update the total accesses
             self.total_accesses += 1
 
-            # Check for debug mode to log the address, tag and index
-            if self.debug_var:
-                self.save_on_log("Address: {}, tag: {}, index: {}, result: {}".format(address, tag, index, result))
+            # Save on Log soo can be used later if wanted to interface log
+            #if self.debug_var:
+            self.save_on_log("{},{},{},{}".format(address, tag, index, result))
         
         # Return the output
         return self.get_output()

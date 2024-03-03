@@ -20,11 +20,10 @@ Description: Cache simulator for binary files. It can simulate the cache and ret
 """
 
 import argparse
-import os
 import time
 import sys
-from file_reader import read_file
-from cache import Cache
+from sim_cache.file_reader import read_file
+from sim_cache.cache import Cache
 
 def simulate_cache(nsets: int, bsize: int, assoc: int, subs_method: str, output_flag: int, input_file: str, debug: bool=False) -> str:
     """
@@ -58,21 +57,22 @@ def simulate_cache(nsets: int, bsize: int, assoc: int, subs_method: str, output_
     return cache.simulate_cache(memory_address_byte, memory_address_int)
 
 if __name__ == "__main__":
-    #parser = argparse.ArgumentParser(description="Cache simulator for binary files.")
-    #parser.add_argument("nsets", type=int, help="Number of sets for the cache")
-    #parser.add_argument("bsize", type=int, help="Block size for the cache")
-    #parser.add_argument("assoc", type=int, help="Associativity for the cache")
-    #parser.add_argument("subs_method", type=str, help="Replacement policy for the cache")
-    #parser.add_argument("output_flag", type=int, help="Flag that defines how the output will look like, flag=0 for free format, flag=1 The default output format should adhere to the following order: Total accesses, Hit rate, Miss rate, Compulsory miss rate, Capacity miss rate, Conflict miss rate.Example: 100000, 0.95, 0.06, 0.01, 0.02, 0.03.")
-    #parser.add_argument("input_file", type=str, help="Path to the file to read, needs to be a binary file")
-    #parser.add_argument("--debug", type=bool, help="Debug mode", default=False, required=False)
-    #args = parser.parse_args()
+    
+    parser = argparse.ArgumentParser(description="Cache simulator for binary files.")
+    parser.add_argument("nsets", type=int, help="Number of sets for the cache")
+    parser.add_argument("bsize", type=int, help="Block size for the cache")
+    parser.add_argument("assoc", type=int, help="Associativity for the cache")
+    parser.add_argument("subs_method", type=str, help="Replacement policy for the cache")
+    parser.add_argument("output_flag", type=int, help="Flag that defines how the output will look like, flag=0 for free format, flag=1 The default output format should adhere to the following order: Total accesses, Hit rate, Miss rate, Compulsory miss rate, Capacity miss rate, Conflict miss rate.Example: 100000, 0.95, 0.06, 0.01, 0.02, 0.03.")
+    parser.add_argument("input_file", type=str, help="Path to the file to read, needs to be a binary file")
+    parser.add_argument("--debug", type=bool, help="Debug mode", default=False, required=False)
+    args = parser.parse_args()
 
     try:
         start = time.time()
-        #result = simulate_cache(args.nsets, args.bsize, args.assoc, args.subs_method, args.output_flag, args.input_file, args.debug)
-        result = simulate_cache(1, 4, 32, "L", 1, 
-        "C:\\Users\\gusta\\OneDrive\\Documents\\GitHub\\cache_simulator\\example_files\\address\\vortex.in.sem.persons.bin", True)
+        result = simulate_cache(args.nsets, args.bsize, args.assoc, args.subs_method, args.output_flag, args.input_file, args.debug)
+        #result = simulate_cache(1, 4, 32, "L", 1, 
+        #"C:\\Users\\gusta\\OneDrive\\Documents\\GitHub\\cache_simulator\\example_files\\address\\vortex.in.sem.persons.bin", True)
         end = time.time()
         print(result)
         print("Execution time: {:.6f} seconds".format(end - start))

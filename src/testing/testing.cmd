@@ -1,1 +1,0 @@
-call python .\src\sim_cache\cache_simulator.py 2 1 8 F 1 .\example_files\address\bin_100.bin --debug 0

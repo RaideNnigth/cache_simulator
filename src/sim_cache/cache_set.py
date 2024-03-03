@@ -9,7 +9,7 @@ from collections import deque
 from random import randint
 
 from math import log2, pow
-from block import Block
+from .block import Block
 
 class CacheSet:
     def __init__(self, number_of_blocks: int, bsize:int, nsets: int, ways: int, subs_method: str ) -> None:
