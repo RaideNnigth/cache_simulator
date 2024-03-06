@@ -1,0 +1,10 @@
+Total accesses: 186676
+Hit rate: 55.300000000000004 %
+Miss rate: 44.7 %
+Compulsory miss rate: 0.04 %
+Capacity miss rate: 99.96000000000001 %
+Conflict miss rate: 0.0 %
+Conflict misses: 0
+Compulsory misses:32
+Capacity misses: 83418
+Total misses: 83450

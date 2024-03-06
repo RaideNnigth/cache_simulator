@@ -1,6 +1,6 @@
-from ast import List
+
 from tkinter.messagebox import RETRY
-from flask import Flask, render_template, url_for, request, jsonify, flash, redirect
+from flask import Flask, render_template, send_file, url_for, request, jsonify, flash, redirect
 # import the cache simulator
 from cache_simulator import simulate_cache
 
@@ -35,6 +35,12 @@ headings = ("Address", "Tag", "Index", "Hit/Miss")
 # Cache table data
 data = []
 
+# Stats
+stats = ""
+
+# Latest input
+latest_input = []
+
 # Home page
 @app.route('/', methods=['GET'])
 def home():
@@ -43,6 +49,7 @@ def home():
 
 @app.route('/submit_cache', methods=['GET', 'POST'])
 def submit_cache():
+    global stats
     if request.method == 'POST':
 
         # Check if any log file exists, if so delete it
@@ -69,6 +76,9 @@ def submit_cache():
             return redirect(request.url)
 
         if file:
+            # Get latest input
+            latest_input = [nsets, bsize, assoc, subs_method, output_flag, file.filename]
+
             # Secure filename and save it to the upload folder
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -109,15 +119,6 @@ def submit_cache():
         else:
             flash('ERROR:: No file uploaded. Please try again.', 'error')
             return redirect(request.url)
-    else:
-        return render_template('home.html', headings=headings)
-
-@app.route('/sim_cache', methods=['GET', 'POST'])
-def sim_cache():
-    if request.method == 'POST':
-        # Return the home page with the data
-        flash('Cache simulation successful!', 'success')
-        return render_template('home.html', headings=headings)
     else:
         return render_template('home.html', headings=headings)
     
@@ -165,9 +166,28 @@ def clean_cache():
         # Delete the log file
         os.remove(LOG_FILE)
 
+    if os.path.exists('./report.txt'):
+        os.remove('./report.txt')
+
     # Return the home page with the data
     flash('Cache cleared!', 'success')
     return render_template('home.html', headings=headings, data=data)
+
+@app.route('/report', methods=['GET'])
+def report():
+    if os.path.exists('./report.txt'):
+        return send_file('./report.txt', as_attachment=True)
+    else:
+        flash('ERROR:: No report file found. Please make sure to submit a file first.', 'error')
+        return render_template('home.html', headings=headings, error="No report file found. Please make sure to submit a file first.")
+    
+@app.route('/logfile', methods=['GET'])
+def logfile():
+    if os.path.exists('./log.txt'):
+        return send_file('./log.txt', as_attachment=True)
+    else:
+        flash('ERROR:: No log file found. Please make sure to submit a file first.', 'error')
+        return render_template('home.html', headings=headings, error="No log file found. Please make sure to submit a file first.")
 
 if __name__ == '__main__':
     app.run(debug=True, host=host)

@@ -68,6 +68,22 @@ if __name__ == "__main__":
     parser.add_argument("--debug", type=bool, help="Debug mode", default=False, required=False)
     args = parser.parse_args()
 
+    # Check it arg
+    if args.nsets <= 0:
+        raise ValueError("nsets needs to be greater than 0")
+    
+    if args.bsize <= 0:
+        raise ValueError("bsize needs to be greater than 0")
+    
+    if args.assoc <= 0:
+        raise ValueError("assoc needs to be greater than 0")
+    
+    if args.output_flag < 0 or args.output_flag > 1:
+        raise ValueError("output_flag needs to be 0 or 1")
+    
+    if args.subs_method not in ["R", "L", "F"]:
+        raise ValueError("subs_method needs to be R or L or F")
+    
     try:
         start = time.time()
         result = simulate_cache(args.nsets, args.bsize, args.assoc, args.subs_method, args.output_flag, args.input_file, args.debug)
@@ -75,7 +91,7 @@ if __name__ == "__main__":
         #"C:\\Users\\gusta\\OneDrive\\Documents\\GitHub\\cache_simulator\\example_files\\address\\vortex.in.sem.persons.bin", True)
         end = time.time()
         print(result)
-        print("Execution time: {:.6f} seconds".format(end - start))
+        #print("Execution time: {:.6f} seconds".format(end - start))
     except Exception as e:
         print(e)
         sys.exit(1)

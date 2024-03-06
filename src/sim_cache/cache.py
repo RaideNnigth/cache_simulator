@@ -55,7 +55,7 @@ class Cache:
         # Cache structure
         self.cache_set: CacheSet = CacheSet(self.number_of_blocks, self.bsize, self.nsets, self.ways, self.subs_method)
     
-    def simulate_cache(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> None:
+    def simulate_cache(self, memory_address_byte: list[bytes], memory_address_int: list[int]) -> str:
         """
         Simulate the cache and return some statistics. (Can simulate direct-mapped, fully associative and multi-way set associative)
 
@@ -115,6 +115,25 @@ class Cache:
 
         self.set_cache_statistics()
 
+        
+        # custom stats
+        stats = "Total accesses: {}\nHit rate: {} %\nMiss rate: {} %\nCompulsory miss rate: {} %\nCapacity miss rate: {} %\nConflict miss rate: {} %\nConflict misses: {}\nCompulsory misses:{}\nCapacity misses: {}\nTotal misses: {}".format(
+                self.total_accesses, 
+                self.hit_rate * 100, 
+                self.miss_rate * 100, 
+                self.compulsory_miss_rate * 100, 
+                self.capacity_miss_rate * 100, 
+                self.conflict_miss_rate * 100,
+                self.conflict_misses,
+                self.compulsory_misses,
+                self.capacity_misses,
+                self.total_misses
+            )
+
+        # Write one folder up the report file with Stats
+        with open("report.txt", "w") as file:
+            file.write(stats)
+
         if self.output_flag == 0:
             return "Total accesses: {}\nHit rate: {} %\nMiss rate: {} %\nCompulsory miss rate: {} %\nCapacity miss rate: {} %\nConflict miss rate: {} %\nConflict misses: {}\nCompulsory misses:{}\nCapacity misses: {}\nTotal misses: {}".format(
                 self.total_accesses, 
@@ -147,14 +166,14 @@ class Cache:
         """
         self.total_misses = self.compulsory_misses + self.capacity_misses + self.conflict_misses
         if (self.total_accesses != 0):
-            self.hit_rate = round(self.memory_access_hit / self.total_accesses, 2)
+            self.hit_rate = round(self.memory_access_hit / self.total_accesses, 4)
         
-        self.miss_rate = round(1 - self.hit_rate, 2)
+        self.miss_rate = round(1 - self.hit_rate, 4)
 
         if (self.total_misses != 0):
-            self.compulsory_miss_rate = round(self.compulsory_misses / self.total_misses, 2)
-            self.capacity_miss_rate = round(self.capacity_misses / self.total_misses, 2)
-            self.conflict_miss_rate = round(self.conflict_misses / self.total_misses, 2)
+            self.compulsory_miss_rate = round(self.compulsory_misses / self.total_misses, 4)
+            self.capacity_miss_rate = round(self.capacity_misses / self.total_misses, 4)
+            self.conflict_miss_rate = round(self.conflict_misses / self.total_misses, 4)
 
     def debug(self) -> None:
         """

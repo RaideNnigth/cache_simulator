@@ -54,7 +54,7 @@
 
                 <button type="submit">Submit</button>
             </form>
-            <form action="/sim_cache" method="post" id="sim_cache_form" method="post" enctype="multipart/form-data">
+            <form method="post" id="sim_cache_form" method="post" enctype="multipart/form-data">
                 <button type="submit">Simulate</button>
             </form>
             <form action="/clean_cache" method="post" id="clean_cache_form" method="post" enctype="multipart/form-data">
@@ -141,7 +141,7 @@
         };
         xhr.send(formData);
 
-        cleanDataOnFlask();
+        //cleanDataOnFlask();
     });
 
     function cleanDataOnFlask() {
